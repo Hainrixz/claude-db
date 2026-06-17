@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Hainrixz/claude-db/schema/finding.schema.json",
+  "title": "claude-db Finding",
+  "description": "A single database audit finding. Falsifiability-first: every finding must be independently observable (evidence.observed, verbatim, with secrets redacted) and re-checkable (verification.reproduce). Impact is banded + confidence-tagged, never a fabricated percentage. needs_api is NEVER a silent pass.",
+  "type": "object",
+  "required": ["id", "module", "title", "status", "severity", "scope", "evidence", "expected", "recommendation", "fixable", "verification", "expected_impact"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, module-prefixed rule id, e.g. 'M11.orders.customer_id_fk_unindexed'.",
+      "pattern": "^M([0-9]|1[0-9]|2[0-2])[a-z]?\\.[a-z0-9_.-]+$"
+    },
+    "module": {
+      "type": "string",
+      "description": "Owning module id M0..M22 (M0 = engine-selection recommendation, never scored). Sub-module letters allowed (e.g. M20a vector); the scorer maps to the parent.",
+      "pattern": "^M([0-9]|1[0-9]|2[0-2])[a-z]?$"
+    },
+    "title": { "type": "string", "minLength": 3, "maxLength": 160 },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "warn", "fail", "not_applicable", "needs_api"],
+      "description": "needs_api means the check needs a live DB / Tier-1+ to verify — it is NEVER a silent pass."
+    },
+    "severity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "1 = cosmetic, 5 = can cap the score (e.g. no primary key, plaintext secrets, destructive irreversible migration). 0 is reserved for not_applicable (excluded from scoring)."
+    },
+    "scope": { "type": "string", "enum": ["column", "table", "index", "schema", "database", "cluster", "query", "collection", "keyspace"] },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "object": { "type": "string" },
+        "statement": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "The OBSERVED fact — verbatim DDL/migration/query, with credentials redacted.",
+      "required": ["observed"],
+      "additionalProperties": false,
+      "properties": {
+        "observed": { "type": "string", "minLength": 1 },
+        "snippet": { "type": "string" }
+      }
+    },
+    "expected": { "type": "string", "minLength": 1 },
+    "recommendation": { "type": "string", "minLength": 1 },
+    "fixable": {
+      "type": "string",
+      "enum": ["auto", "proposed", "advisory"],
+      "description": "auto = deterministic/additive/verifiable write (e.g. CREATE INDEX CONCURRENTLY); proposed = draft requiring per-item accept; advisory = never written by the tool."
+    },
+    "fix_preview": {
+      "type": "string",
+      "description": "Unified diff, new-file content, or migration SQL. Present when fixable is auto/proposed."
+    },
+    "verification": {
+      "type": "object",
+      "description": "How to confirm this finding independently. reproduce MUST be runnable; reference live connections via $DATABASE_URL, never a literal credential.",
+      "required": ["method", "assertion", "reproduce"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["ddl_parse", "migration_lint", "schema_introspect", "index_check", "explain_plan", "constraint_check", "query_stat", "dry_run_migration", "connection_introspect", "manual_review"]
+        },
+        "assertion": { "type": "string", "minLength": 1 },
+        "reproduce": { "type": "string", "minLength": 1 }
+      }
+    },
+    "expected_impact": {
+      "type": "object",
+      "description": "Honest, banded impact. NO naked percentages — published numbers may appear only inside rationale with a citation.",
+      "required": ["axis", "confidence", "magnitude", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "axis": {
+          "type": "string",
+          "enum": ["design", "performance", "both"],
+          "description": "Which score(s) this finding feeds: Design & Integrity, Performance & Scale, or both."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["established", "directional", "speculative"],
+          "description": "established = durable fact or Tier-1/2-backed (can cap); directional = strong static signal; speculative = inference without live data — NEVER caps a score."
+        },
+        "magnitude": { "type": "string", "enum": ["high", "medium", "low"] },
+        "rationale": { "type": "string", "minLength": 1 }
+      }
+    },
+    "doc_ref": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" }
+    },
+    "db": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "type": "string",
+          "enum": ["postgres", "mysql", "mariadb", "sqlite", "mongodb", "redis", "cassandra", "scylla", "pgvector", "qdrant", "pinecone", "weaviate", "timescaledb", "influxdb", "clickhouse", "neo4j", "dynamodb", "firestore", "supabase", "neon", "planetscale", "turso", "d1", "cockroachdb", "yugabyte", "elasticsearch", "opensearch", "generic"]
+        },
+        "paradigm": {
+          "type": "string",
+          "enum": ["relational", "document", "key-value", "wide-column", "vector", "time-series", "graph"]
+        },
+        "object": { "type": "string" },
+        "object_type": {
+          "type": "string",
+          "enum": ["table", "column", "index", "constraint", "collection", "keyspace", "view", "materialized_view", "sequence", "migration", "query"]
+        },
+        "sql": { "type": "string" }
+      }
+    }
+  }
+}

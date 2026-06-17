@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+        with:
+          python-version: "3.12"
+
+      # Gate the release on the same checks CI runs — never ship a broken tag.
+      - name: Syntax-check Node scripts
+        run: |
+          find scripts tests -name "*.mjs" -not -path "*/node_modules/*" | while read -r f; do
+            node --check "$f"
+          done
+
+      - name: Syntax-check Python parser
+        run: python3 -m py_compile scripts/parse-orm-python.py
+
+      - name: Run Node test harness
+        run: node tests/run.mjs
+
+      - name: Run pytest
+        run: |
+          pip install pytest
+          pytest tests/
+
+      - name: Validate manifest version matches the tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST=$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          if [ "${TAG}" != "${MANIFEST}" ]; then
+            echo "✗ Tag v${TAG} does not match plugin.json version ${MANIFEST}"; exit 1
+          fi
+          echo "OK: tag matches plugin.json version ${MANIFEST}"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8  # v2
+        with:
+          generate_release_notes: true

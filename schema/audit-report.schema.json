@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Hainrixz/claude-db/schema/audit-report.schema.json",
+  "title": "claude-db Audit Report",
+  "description": "The merged result of an audit: two never-blended scores plus the findings that produced them. Multi-store targets carry per-store breakdowns and a worst-of rollup.",
+  "type": "object",
+  "required": ["target", "generated_at", "tier", "paradigm", "scores", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "target": {
+      "type": "object",
+      "required": ["kind", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["path", "connection_string", "description"] },
+        "value": { "type": "string", "description": "Credential-redacted reference to the audited target." }
+      }
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "tier": { "type": "integer", "enum": [0, 1, 2] },
+    "paradigm": {
+      "type": "string",
+      "enum": ["relational", "document", "key-value", "wide-column", "vector", "time-series", "graph"]
+    },
+    "engine": { "type": "string" },
+    "scores": {
+      "type": "object",
+      "required": ["design_integrity", "performance_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "design_integrity": { "$ref": "#/$defs/score" },
+        "performance_scale": { "$ref": "#/$defs/score" }
+      }
+    },
+    "stores": {
+      "type": "array",
+      "description": "Per-store scores when more than one datastore is detected. The top-level scores are the worst-of across these.",
+      "items": {
+        "type": "object",
+        "required": ["name", "paradigm", "scores"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "paradigm": { "type": "string" },
+          "engine": { "type": "string" },
+          "scores": {
+            "type": "object",
+            "required": ["design_integrity", "performance_scale"],
+            "additionalProperties": false,
+            "properties": {
+              "design_integrity": { "$ref": "#/$defs/score" },
+              "performance_scale": { "$ref": "#/$defs/score" }
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "https://github.com/Hainrixz/claude-db/schema/finding.schema.json" }
+    }
+  },
+  "$defs": {
+    "score": {
+      "type": "object",
+      "required": ["value", "band", "capped", "categories"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "minimum": 0, "maximum": 100, "description": "The reported score. When capped, this is min(computed, 59)." },
+        "computed": { "type": "number", "minimum": 0, "maximum": 100, "description": "The uncapped score; always rendered alongside value." },
+        "band": { "type": "string", "enum": ["A", "B", "C", "D", "F"] },
+        "capped": { "type": "boolean" },
+        "interpretation": { "type": "string" },
+        "needs_api_count": { "type": "integer", "minimum": 0 },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "weight", "value", "active"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "weight": { "type": "number" },
+              "value": { "type": "number" },
+              "active": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

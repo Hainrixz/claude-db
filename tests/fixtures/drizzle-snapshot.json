@@ -1,0 +1,40 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "customers": {
+      "name": "customers",
+      "columns": {
+        "id": { "name": "id", "type": "bigserial", "primaryKey": true, "notNull": true },
+        "email": { "name": "email", "type": "text", "primaryKey": false, "notNull": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "customers_email_unique": { "name": "customers_email_unique", "columns": ["email"], "isUnique": true }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "orders": {
+      "name": "orders",
+      "columns": {
+        "id": { "name": "id", "type": "bigserial", "primaryKey": true, "notNull": true },
+        "customer_id": { "name": "customer_id", "type": "bigint", "primaryKey": false, "notNull": true },
+        "amount": { "name": "amount", "type": "numeric(12, 2)", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "orders_customer_id_customers_id_fk": {
+          "name": "orders_customer_id_customers_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "customers",
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"]
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  }
+}

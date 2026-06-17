@@ -1,0 +1,13 @@
+{
+  "_readme": "OPTIONAL, opt-in Tier-1 read-only database MCP. claude-db works at Tier 0 with ZERO MCPs, zero API keys, and no database connection (it reads your schema/migration/ORM files or a plain-language description). Tier 1 only SHARPENS findings with live catalog introspection (real index inventory, FK-without-index, RLS state, table/row sizes, engine version) and upgrades affected findings to confidence:established. We do NOT auto-start this server, so enabling the plugin never forces a download, a credential prompt, or a connection. To enable it, copy the entry below into your project .mcp.json (or ~/.claude.json mcpServers) and approve it. This uses crystaldba/postgres-mcp (Postgres MCP Pro) launched with --access-mode=restricted. IMPORTANT: --access-mode=restricted is defense-in-depth, NOT the safety boundary. Tier-1 safety relies on a DB-SIDE LEAST-PRIVILEGE READ-ONLY ROLE (a role with only CONNECT + SELECT on the catalogs/tables you want introspected, never a write- or superuser role) plus a server-side statement_timeout — not on a single server flag. Point DATABASE_URL_READONLY at that least-privilege read-only role; the introspect skill issues only SELECT/EXPLAIN/catalog reads, and a PreToolUse hook (mcp__.*) blocks anything that is not a read. Connection strings are read from the environment and never echoed; redactSecrets() scrubs credentials before they reach any finding, report, or log. Tier 2 (sustained runtime statistics) reuses this same read-only connection.",
+  "mcpServers": {
+    "postgres-readonly": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["postgres-mcp", "--access-mode=restricted"],
+      "env": {
+        "DATABASE_URI": "${DATABASE_URL_READONLY}"
+      }
+    }
+  }
+}

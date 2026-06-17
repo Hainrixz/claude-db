@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "claude-db",
+  "owner": {
+    "name": "Enrique Rocha",
+    "email": "enriqueers98@gmail.com"
+  },
+  "description": "Multi-paradigm database design, audit, and migration suite for Claude Code.",
+  "plugins": [
+    {
+      "name": "claude-db",
+      "source": "./",
+      "description": "Design a new database, audit an existing one on two independent axes, and plan safe migrations — across SQL, document, key-value, vector, time-series, and graph engines.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "category": "developer-tools",
+      "keywords": ["database", "sql", "schema-design", "indexing", "migrations", "nosql", "vector"]
+    }
+  ]
+}

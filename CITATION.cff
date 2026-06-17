@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "claude-db: multi-paradigm database design, audit, and migration toolkit for Claude Code"
+message: "If you use this software, please cite it using these metadata."
+type: software
+authors:
+  - given-names: Enrique
+    family-names: Rocha
+    email: enriqueers98@gmail.com
+    website: "https://tododeia.com"
+repository-code: "https://github.com/Hainrixz/claude-db"
+url: "https://github.com/Hainrixz/claude-db"
+abstract: >-
+  claude-db is an MIT-licensed Claude Code plugin that turns Claude into a senior multi-paradigm
+  database expert. It designs new schemas, audits existing databases on two independent axes
+  (Design & Integrity and Performance & Scale), and plans safe, reversible migrations across
+  relational, document, key-value, wide-column, vector, time-series, and graph engines. Findings are
+  falsifiable (observed evidence plus a runnable verification command), magnitudes are banded, and the
+  tool never fabricates statistics or prices.
+keywords:
+  - database
+  - schema-design
+  - data-modeling
+  - indexing
+  - migrations
+  - nosql
+  - vector-database
+  - claude-code
+license: MIT
+version: 0.1.0
+date-released: "2026-01-01"

@@ -1,0 +1,16 @@
+version: 2
+# Security-only mode: open-pull-requests-limit: 0 disables routine version-bump PRs.
+# GitHub's security advisory feed still raises Dependabot alerts and opens PRs for
+# vulnerabilities even with the limit at 0 — that's the supported pattern. claude-db
+# ships zero runtime dependencies, so the only surface here is the GitHub Actions
+# pinned in the workflows.
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#open-pull-requests-limit
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    labels:
+      - dependencies
+      - security

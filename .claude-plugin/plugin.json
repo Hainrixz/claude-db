@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "claude-db",
+  "displayName": "Claude DB",
+  "version": "0.1.0",
+  "description": "Design, audit, and safely migrate any database with Claude. Multi-paradigm (SQL, document, key-value, wide-column, vector, time-series, graph), two independent scores (Design & Integrity + Performance & Scale), reproducible findings, and opt-in fixes. Works offline.",
+  "author": {
+    "name": "Enrique Rocha",
+    "email": "enriqueers98@gmail.com"
+  },
+  "homepage": "https://github.com/Hainrixz/claude-db",
+  "repository": "https://github.com/Hainrixz/claude-db",
+  "license": "MIT",
+  "keywords": [
+    "database",
+    "sql",
+    "postgres",
+    "mysql",
+    "mongodb",
+    "schema-design",
+    "data-modeling",
+    "indexing",
+    "migrations",
+    "orm",
+    "prisma",
+    "drizzle",
+    "nosql",
+    "vector",
+    "pgvector",
+    "audit"
+  ]
+}

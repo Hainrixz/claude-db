@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+        with:
+          python-version: "3.12"
+
+      - name: Syntax-check all Node scripts
+        run: |
+          find scripts tests -name "*.mjs" -not -path "*/node_modules/*" | while read -r f; do
+            node --check "$f" && echo "OK: $f"
+          done
+
+      - name: Syntax-check the Python ORM parser
+        run: |
+          python3 -m py_compile scripts/parse-orm-python.py && echo "OK: scripts/parse-orm-python.py"
+
+      - name: Run the Node scoring/invariant test harness
+        run: node tests/run.mjs
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Run the pytest suite (skill loading, references, scripts)
+        run: pytest tests/ -q
+
+      - name: Validate JSON schemas and plugin manifests
+        run: |
+          for f in schema/finding.schema.json schema/audit-report.schema.json \
+                   .claude-plugin/plugin.json .claude-plugin/marketplace.json; do
+            python3 -m json.tool "$f" > /dev/null && echo "OK: $f"
+          done

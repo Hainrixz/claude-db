@@ -1,0 +1,23 @@
+# Dependencies (the core scripts are zero-dependency; this guards dev tooling)
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Local state / backups written by the fixer
+.claude-db/
+backups/
+
+# Secrets — never commit a real connection string
+.env
+.env.*
+!.env.example
+.mcp.json
+
+# OS / editor
+.DS_Store
+*.log
+.idea/
+.vscode/
